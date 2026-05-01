@@ -236,7 +236,30 @@ router.post('/execute', requireConnection, async (req, res, next) => {
     const { sql, params, warnings } = buildQuery(queryDefWithPaging, session.compat);
 
     // Execute the parameterized query
-    const [rows, fields] = await connSvc.query(req.session.id, sql, params);
+    const startTime = Date.now();
+    let rows, fields;
+    try {
+      [rows, fields] = await connSvc.query(req.session.id, sql, params);
+      
+      // Log success
+      if (req.session.userId) {
+        const pool = getInternalPool();
+        pool.query(
+          'INSERT INTO query_logs (user_id, query_text, execution_time_ms, status) VALUES (?, ?, ?, ?)',
+          [req.session.userId, sql, Date.now() - startTime, 'success']
+        ).catch(e => console.error('[LOG] Query log failed:', e.message));
+      }
+    } catch (err) {
+      // Log error
+      if (req.session.userId) {
+        const pool = getInternalPool();
+        pool.query(
+          'INSERT INTO query_logs (user_id, query_text, execution_time_ms, status, error_message) VALUES (?, ?, ?, ?, ?)',
+          [req.session.userId, sql, Date.now() - startTime, 'error', err.message]
+        ).catch(e => console.error('[LOG] Query log failed:', e.message));
+      }
+      throw err;
+    }
 
     // Build column metadata for the results panel
     const columns = fields.map((f) => ({

@@ -7,6 +7,8 @@ import { useQueryStore } from './store/queryStore';
 import Builder from './pages/Builder/Builder';
 import Login from './pages/Auth/Login';
 import Signup from './pages/Auth/Signup';
+import ForgotPassword from './pages/Auth/ForgotPassword';
+import ToastContainer from './components/Toast/Toast';
 
 import './App.css';
 
@@ -35,20 +37,27 @@ export default function App() {
   }
 
   return (
-    <Routes>
-      <Route 
-        path="/" 
-        element={isAuthenticated ? <Builder /> : <Navigate to="/login" replace />} 
-      />
-      <Route 
-        path="/login" 
-        element={!isAuthenticated ? <Login /> : <Navigate to="/" replace />} 
-      />
-      <Route 
-        path="/signup" 
-        element={!isAuthenticated ? <Signup /> : <Navigate to="/" replace />} 
-      />
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+    <>
+      <ToastContainer />
+      <Routes>
+        <Route 
+          path="/" 
+          element={isAuthenticated ? <Builder /> : <Navigate to="/login" replace />} 
+        />
+        <Route 
+          path="/login" 
+          element={!isAuthenticated ? <Login /> : <Navigate to="/" replace />} 
+        />
+        <Route 
+          path="/signup" 
+          element={!isAuthenticated ? <Signup /> : <Navigate to="/" replace />} 
+        />
+        <Route 
+          path="/forgot-password" 
+          element={!isAuthenticated ? <ForgotPassword /> : <Navigate to="/" replace />} 
+        />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </>
   );
 }

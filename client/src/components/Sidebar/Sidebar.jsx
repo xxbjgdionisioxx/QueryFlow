@@ -8,13 +8,13 @@
 import React, { useState } from 'react';
 import {
   Database, Table2, ChevronRight, ChevronDown,
-  Key, Hash, Type, Search, RefreshCw
+  Key, Hash, Type, Search, RefreshCw, PanelLeftClose, PanelLeft
 } from 'lucide-react';
 import { useQueryStore } from '../../store/queryStore';
 import { useConnectionStore } from '../../store/connectionStore';
 import './Sidebar.css';
 
-export default function Sidebar() {
+export default function Sidebar({ isOpen, onToggle }) {
   const { schema, isLoadingSchema, schemaError, loadSchema } = useQueryStore();
   const { database } = useConnectionStore();
   const [search, setSearch] = useState('');
@@ -40,78 +40,95 @@ export default function Sidebar() {
   };
 
   return (
-    <aside className="app-sidebar">
+    <aside className={`app-sidebar ${!isOpen ? 'collapsed' : ''}`}>
       {/* Header */}
       <div className="sidebar-header">
-        <div className="sidebar-db-name">
-          <Database size={14} />
-          <span>{database || 'No database'}</span>
-        </div>
-        <button
-          id="sidebar-refresh-btn"
-          className="btn btn-ghost btn-icon"
-          onClick={loadSchema}
-          disabled={isLoadingSchema}
-          data-tooltip="Refresh schema"
-        >
-          <RefreshCw size={13} className={isLoadingSchema ? 'spin' : ''} />
-        </button>
-      </div>
-
-      {/* Search */}
-      <div className="sidebar-search">
-        <Search size={13} className="sidebar-search-icon" />
-        <input
-          id="sidebar-search-input"
-          type="text"
-          placeholder="Search tables & columns…"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-      </div>
-
-      {/* Table count */}
-      {!isLoadingSchema && schema.length > 0 && (
-        <div className="sidebar-meta">
-          {filteredSchema.length} of {schema.length} tables
-        </div>
-      )}
-
-      {/* Error */}
-      {schemaError && (
-        <div className="sidebar-error">{schemaError}</div>
-      )}
-
-      {/* Loading */}
-      {isLoadingSchema && (
-        <div className="sidebar-loading">
-          {[...Array(5)].map((_, i) => (
-            <div key={i} className="skeleton sidebar-skeleton" />
-          ))}
-        </div>
-      )}
-
-      {/* Schema tree */}
-      <div className="scroll-area sidebar-tree">
-        {filteredSchema.map((table) => (
-          <TableItem
-            key={table.tableName}
-            table={table}
-            isExpanded={expandedTables.has(table.tableName)}
-            onToggle={() => toggleTable(table.tableName)}
-            onDragStart={handleDragStart}
-            search={search}
-          />
-        ))}
-
-        {!isLoadingSchema && filteredSchema.length === 0 && schema.length > 0 && (
-          <div className="sidebar-empty">No tables match "{search}"</div>
+        {isOpen && (
+          <div className="sidebar-db-name">
+            <Database size={14} />
+            <span>{database || 'No database'}</span>
+          </div>
         )}
-
-        {!isLoadingSchema && schema.length === 0 && !schemaError && (
-          <div className="sidebar-empty">No tables found</div>
-        )}
+        <div className="sidebar-header-actions" style={{ marginLeft: !isOpen ? '0' : 'auto', display: 'flex', gap: '4px', alignItems: 'center' }}>
+          {isOpen && (
+            <button
+              id="sidebar-refresh-btn"
+              className="btn btn-ghost btn-icon btn-sm"
+              onClick={loadSchema}
+              disabled={isLoadingSchema}
+              data-tooltip="Refresh schema"
+            >
+              <RefreshCw size={13} className={isLoadingSchema ? 'spin' : ''} />
+            </button>
+          )}
+          <button
+            className="sidebar-toggle btn btn-ghost btn-icon btn-sm"
+            onClick={onToggle}
+            title={isOpen ? "Collapse Sidebar" : "Expand Sidebar"}
+          >
+            {isOpen ? <PanelLeftClose size={14} /> : <PanelLeft size={14} />}
+          </button>
+        </div>
       </div>
+
+      {isOpen && (
+        <>
+          {/* Search */}
+          <div className="sidebar-search">
+            <Search size={13} className="sidebar-search-icon" />
+            <input
+              id="sidebar-search-input"
+              type="text"
+              placeholder="Search tables & columns…"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
+
+          {/* Table count */}
+          {!isLoadingSchema && schema.length > 0 && (
+            <div className="sidebar-meta">
+              {filteredSchema.length} of {schema.length} tables
+            </div>
+          )}
+
+          {/* Error */}
+          {schemaError && (
+            <div className="sidebar-error">{schemaError}</div>
+          )}
+
+          {/* Loading */}
+          {isLoadingSchema && (
+            <div className="sidebar-loading">
+              {[...Array(5)].map((_, i) => (
+                <div key={i} className="skeleton sidebar-skeleton" />
+              ))}
+            </div>
+          )}
+
+          {/* Schema tree */}
+          <div className="scroll-area sidebar-tree">
+            {filteredSchema.map((table) => (
+              <TableItem
+                key={table.tableName}
+                table={table}
+                isExpanded={expandedTables.has(table.tableName)}
+                onToggle={() => toggleTable(table.tableName)}
+                onDragStart={handleDragStart}
+                search={search}
+              />
+            ))}
+
+            {!isLoadingSchema && filteredSchema.length === 0 && schema.length > 0 && (
+              <div className="sidebar-empty">No tables match "{search}"</div>
+            )}
+
+            {!isLoadingSchema && schema.length === 0 && !schemaError && (
+              <div className="sidebar-empty">No tables found</div>
+            )}
+          </div>
+        </>
+      )}
     </aside>
   );
 }

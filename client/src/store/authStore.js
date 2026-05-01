@@ -14,7 +14,7 @@ export const useAuthStore = create((set, get) => ({
       set({ isAuthLoading: true });
       const { data } = await api.get('/auth/me');
       set({ 
-        user: data.user, 
+        user: { ...data.user, name: data.user.name || data.user.email }, 
         isAuthenticated: true, 
         isAuthLoading: false 
       });
@@ -28,20 +28,59 @@ export const useAuthStore = create((set, get) => ({
   login: async (email, password) => {
     try {
       const { data } = await api.post('/auth/login', { email, password });
-      set({ user: data, isAuthenticated: true });
+      set({ 
+        user: { ...data, name: data.name || data.email }, 
+        isAuthenticated: true 
+      });
       return { success: true };
     } catch (err) {
       return { success: false, error: err.response?.data?.error || 'Login failed' };
     }
   },
 
-  signup: async (email, password) => {
+  signup: async (email, password, name) => {
     try {
-      const { data } = await api.post('/auth/signup', { email, password });
-      set({ user: data, isAuthenticated: true });
+      await api.post('/auth/signup', { email, password, name });
       return { success: true };
     } catch (err) {
       return { success: false, error: err.response?.data?.error || 'Signup failed' };
+    }
+  },
+
+  forgotPassword: async (email) => {
+    try {
+      const { data } = await api.post('/auth/forgot-password', { email });
+      return { success: true, message: data.message };
+    } catch (err) {
+      return { success: false, error: err.response?.data?.error || 'Failed to request reset' };
+    }
+  },
+
+  resetPassword: async (email, otp, newPassword) => {
+    try {
+      await api.post('/auth/reset-password', { email, otp, newPassword });
+      return { success: true };
+    } catch (err) {
+      return { success: false, error: err.response?.data?.error || 'Reset failed' };
+    }
+  },
+
+  verifyOtp: async (email, otp) => {
+    try {
+      const { data } = await api.post('/auth/verify-otp', { email, otp });
+      set({ user: { id: data.id, email }, isAuthenticated: true });
+      return { success: true };
+    } catch (err) {
+      return { success: false, error: err.response?.data?.error || 'Verification failed' };
+    }
+  },
+
+  resendOtp: async (email) => {
+    try {
+      await api.post('/auth/resend-otp', { email });
+      return { success: true };
+    } catch (err) {
+      return { success: false, error: err.response?.data?.error || 'Failed to resend OTP' };
     }
   },
 

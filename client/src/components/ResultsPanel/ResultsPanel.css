@@ -54,3 +54,40 @@
   color: var(--text-muted);
   font-style: italic;
 }
+
+.results-meta-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.results-export {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.export-label {
+  margin-right: 4px;
+  color: var(--text-muted);
+  font-weight: 500;
+  font-size: 11px;
+}
+
+.results-export .btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 6px;
+  height: 24px;
+  color: var(--text-secondary);
+}
+
+.results-export .btn:hover {
+  background: var(--bg-surface);
+  color: var(--accent-primary);
+}
+
+.results-export .btn span {
+  font-size: 11px;
+}

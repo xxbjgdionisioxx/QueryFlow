@@ -11,15 +11,16 @@ import session from 'express-session';
 import cors from 'cors';
 import { router } from './api/routes.js';
 import { authRouter } from './api/authRoutes.js';
+import { aiRouter } from './api/aiRoutes.js';
 import { initInternalDb } from './services/internalDb.js';
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT;
 
 // ── Middleware ───────────────────────────────────────────────────────────────
 
 app.use(cors({
-  origin: process.env.CLIENT_ORIGIN || 'http://localhost:5173',
+  origin: process.env.CLIENT_ORIGIN,
   credentials: true,          // Allow cookies / session
 }));
 
@@ -27,7 +28,7 @@ app.use(express.json({ limit: '1mb' }));
 
 // Session middleware — stores DB credentials server-side only
 app.use(session({
-  secret: process.env.SESSION_SECRET || 'queryflow-dev-secret-change-in-prod',
+  secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
   cookie: {
@@ -40,6 +41,7 @@ app.use(session({
 // ── Routes ───────────────────────────────────────────────────────────────────
 
 app.use('/api/auth', authRouter);
+app.use('/api/ai', aiRouter);
 app.use('/api', router);
 
 // Health check (no credentials required)

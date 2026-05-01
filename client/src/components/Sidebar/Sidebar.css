@@ -5,6 +5,20 @@
   padding: 10px 12px;
   border-bottom: 1px solid var(--border-default);
   flex-shrink: 0;
+  height: var(--header-height);
+}
+
+.app-sidebar.collapsed .sidebar-header {
+  justify-content: center;
+  padding: 10px 0;
+}
+
+.sidebar-toggle {
+  color: var(--text-muted);
+}
+.sidebar-toggle:hover {
+  color: var(--accent-primary);
+  background: var(--accent-subtle);
 }
 
 .sidebar-db-name {
