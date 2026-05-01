@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   Database, Play, Plug, PlugZap, ChevronDown,
-  Filter, BarChart2, Code2, Table2, Trash2, RotateCcw,
+  Filter, BarChart2, Code2, Table2, Trash2, RotateCcw, PanelLeft, PanelLeftClose
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -13,6 +13,7 @@ import FilterBuilder    from '../../components/FilterBuilder/FilterBuilder';
 import AggregationPanel from '../../components/AggregationPanel/AggregationPanel';
 import SQLPreview       from '../../components/SQLPreview/SQLPreview';
 import ResultsPanel     from '../../components/ResultsPanel/ResultsPanel';
+import AiAssistant      from '../../components/AiAssistant/AiAssistant';
 
 import { useConnectionStore } from '../../store/connectionStore';
 import { useQueryStore }      from '../../store/queryStore';
@@ -35,6 +36,7 @@ export default function Builder() {
   const [showConnModal, setShowConnModal] = useState(!isConnected);
   const [activeTab, setActiveTab] = useState('sql');
   const [bottomPanelOpen, setBottomPanelOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   // Show connection modal on first load if not connected
   useEffect(() => {
@@ -61,7 +63,7 @@ export default function Builder() {
         <ConnectionModal onClose={() => setShowConnModal(false)} />
       )}
 
-      <div className="app-layout">
+      <div className={`app-layout ${!sidebarOpen ? 'sidebar-closed' : ''}`}>
         {/* ── Header ───────────────────────────────────── */}
         <header className="app-header">
           <div className="app-logo">
@@ -102,8 +104,11 @@ export default function Builder() {
 
           {/* User profile / Logout */}
           <div className="user-profile">
-            <span className="user-email">{user?.email}</span>
-            <button className="btn btn-ghost btn-sm" onClick={handleLogout}>
+            <div className="user-info">
+              <span className="user-name">{user?.name}</span>
+              <span className="user-email-header">{user?.email}</span>
+            </div>
+            <button className="btn btn-ghost btn-sm" onClick={handleLogout} style={{ marginLeft: '0.5rem' }}>
               Logout
             </button>
           </div>
@@ -139,7 +144,7 @@ export default function Builder() {
 
         {/* ── Sidebar ───────────────────────────────────── */}
         {isConnected ? (
-          <Sidebar />
+          <Sidebar isOpen={sidebarOpen} onToggle={() => setSidebarOpen(!sidebarOpen)} />
         ) : (
           <aside className="app-sidebar app-sidebar--empty">
             <div className="sidebar-connect-prompt">
@@ -204,6 +209,7 @@ export default function Builder() {
             )}
           </div>
         </main>
+        <AiAssistant />
       </div>
     </>
   );

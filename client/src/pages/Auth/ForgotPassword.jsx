@@ -5,28 +5,29 @@ import { useAuthStore } from '../../store/authStore';
 import { useToastStore } from '../../store/toastStore';
 import './Auth.css';
 
-export default function Signup() {
-  const [name, setName] = useState('');
+export default function ForgotPassword() {
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [otpValues, setOtpValues] = useState(['', '', '', '', '', '']);
-  const [showOtp, setShowOtp] = useState(false);
+  const [newPassword, setNewPassword] = useState('');
+  const [showReset, setShowReset] = useState(false);
   const [error, setError] = useState(null);
+  const [message, setMessage] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [timer, setTimer] = useState(0);
-  const { signup, verifyOtp, resendOtp } = useAuthStore();
+  
+  const { forgotPassword, resetPassword } = useAuthStore();
   const { addToast } = useToastStore();
   const navigate = useNavigate();
 
   useEffect(() => {
     let interval;
-    if (showOtp && timer > 0) {
+    if (showReset && timer > 0) {
       interval = setInterval(() => {
         setTimer((prev) => prev - 1);
       }, 1000);
     }
     return () => clearInterval(interval);
-  }, [showOtp, timer]);
+  }, [showReset, timer]);
 
   const handleOtpChange = (index, value) => {
     if (!/^\d*$/.test(value)) return;
@@ -59,15 +60,16 @@ export default function Signup() {
     document.getElementById(`otp-${nextIdx}`)?.focus();
   };
 
-  const handleSubmit = async (e) => {
+  const handleRequestReset = async (e) => {
     e.preventDefault();
     setError(null);
+    setMessage(null);
     setIsLoading(true);
 
-    const res = await signup(email, password, name);
+    const res = await forgotPassword(email);
     if (res.success) {
-      addToast('Verification code sent to your email!', 'info');
-      setShowOtp(true);
+      addToast(res.message, 'success');
+      setShowReset(true);
       setTimer(60);
     } else {
       setError(res.error);
@@ -75,45 +77,35 @@ export default function Signup() {
     setIsLoading(false);
   };
 
-  const handleVerifyOtp = async (e) => {
+  const handleResetPassword = async (e) => {
     e.preventDefault();
     setError(null);
     setIsLoading(true);
 
     const otp = otpValues.join('');
     if (otp.length < 6) {
-      setError('Please enter the full 6-digit code.');
+      setError('Please enter the 6-digit code.');
       setIsLoading(false);
       return;
     }
 
-    const res = await verifyOtp(email, otp);
+    const res = await resetPassword(email, otp, newPassword);
     if (res.success) {
-      addToast('Account verified! Welcome to QueryFlow.', 'success');
-      navigate('/');
+      addToast('Password reset successfully! Please log in.', 'success');
+      navigate('/login');
     } else {
       setError(res.error);
     }
     setIsLoading(false);
   };
 
-  const handleResendOtp = async () => {
-    if (timer > 0) return;
-    setError(null);
-    const res = await resendOtp(email);
-    if (res.success) {
-      addToast('New verification code sent!', 'success');
-      setTimer(60);
-    } else {
-      setError(res.error);
-    }
-  };
-
   return (
     <div className="auth-container">
       <div className="auth-card glass-panel">
-        <h1 className="auth-title">Create Account</h1>
-        <p className="auth-subtitle">Sign up to get started with QueryFlow.</p>
+        <h1 className="auth-title">Reset Password</h1>
+        <p className="auth-subtitle">
+          {showReset ? 'Enter the code and your new password.' : 'Enter your email to receive a reset code.'}
+        </p>
 
         {error && (
           <div className="auth-error">
@@ -121,10 +113,15 @@ export default function Signup() {
             {error}
           </div>
         )}
+        {message && (
+          <div className="auth-success">
+            <CheckCircle2 size={16} />
+            {message}
+          </div>
+        )}
 
-        {showOtp ? (
-          <form onSubmit={handleVerifyOtp} className="auth-form">
-            <p className="auth-subtitle">A 6-digit code has been sent to your email.</p>
+        {showReset ? (
+          <form onSubmit={handleResetPassword} className="auth-form">
             <div className="form-group">
               <label>Verification Code</label>
               <div className="otp-input-container" onPaste={handlePaste}>
@@ -144,34 +141,35 @@ export default function Signup() {
                 ))}
               </div>
             </div>
-            <button type="submit" className="btn btn-primary auth-submit" disabled={isLoading} style={{ marginTop: '10px' }}>
-              {isLoading ? 'Verifying...' : 'Verify Account'}
+            <div className="form-group">
+              <label>New Password</label>
+              <input 
+                type="password" 
+                value={newPassword} 
+                onChange={(e) => setNewPassword(e.target.value)} 
+                required 
+                placeholder="••••••••"
+                minLength={6}
+              />
+            </div>
+            <button type="submit" className="btn btn-primary auth-submit" disabled={isLoading}>
+              {isLoading ? 'Resetting...' : 'Update Password'}
             </button>
             
             <div className="resend-container">
               {timer > 0 ? (
                 <span className="resend-timer">Resend code in <b>{timer}s</b></span>
               ) : (
-                <button type="button" className="resend-link" onClick={handleResendOtp} disabled={isLoading}>
-                  Didn't receive a code? <span>Resend OTP</span>
+                <button type="button" className="resend-link" onClick={handleRequestReset} disabled={isLoading}>
+                  Didn't receive a code? <span>Resend</span>
                 </button>
               )}
             </div>
           </form>
         ) : (
-          <form onSubmit={handleSubmit} className="auth-form">
+          <form onSubmit={handleRequestReset} className="auth-form">
             <div className="form-group">
-              <label>Full Name</label>
-              <input 
-                type="text" 
-                value={name} 
-                onChange={(e) => setName(e.target.value)} 
-                required 
-                placeholder="John Doe"
-              />
-            </div>
-            <div className="form-group">
-              <label>Email</label>
+              <label>Email Address</label>
               <input 
                 type="email" 
                 value={email} 
@@ -180,25 +178,14 @@ export default function Signup() {
                 placeholder="you@example.com"
               />
             </div>
-            <div className="form-group">
-              <label>Password</label>
-              <input 
-                type="password" 
-                value={password} 
-                onChange={(e) => setPassword(e.target.value)} 
-                required 
-                placeholder="••••••••"
-                minLength={6}
-              />
-            </div>
             <button type="submit" className="btn btn-primary auth-submit" disabled={isLoading}>
-              {isLoading ? 'Creating account...' : 'Sign Up'}
+              {isLoading ? 'Sending code...' : 'Send Reset Code'}
             </button>
           </form>
         )}
 
         <div className="auth-footer">
-          Already have an account? <Link to="/login">Log in here</Link>
+          Back to <Link to="/login">Log in</Link>
         </div>
       </div>
     </div>

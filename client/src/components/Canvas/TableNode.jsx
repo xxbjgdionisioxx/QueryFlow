@@ -10,7 +10,7 @@
 
 import React, { useState } from 'react';
 import { Handle, Position } from '@xyflow/react';
-import { Table2, X, Edit3, Check, CheckSquare, Square } from 'lucide-react';
+import { Table2, X, Edit3, Check, CheckSquare, Square, ChevronDown, ChevronRight } from 'lucide-react';
 import { useQueryStore } from '../../store/queryStore';
 import './TableNode.css';
 
@@ -23,6 +23,7 @@ export default function TableNode({ id, data, selected }) {
 
   const [editingAlias, setEditingAlias] = useState(false);
   const [aliasInput, setAliasInput] = useState(alias || '');
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   const nodeSelected = selectedColumns[id] ?? [];
   const allSelected = nodeSelected.length === columns.length;
@@ -60,6 +61,9 @@ export default function TableNode({ id, data, selected }) {
           </span>
         )}
         <div className="table-node-actions">
+          <button className="node-action-btn" onClick={() => setIsCollapsed(!isCollapsed)} title={isCollapsed ? "Show columns" : "Hide columns"}>
+            {isCollapsed ? <ChevronRight size={11} /> : <ChevronDown size={11} />}
+          </button>
           {editingAlias ? (
             <button className="node-action-btn" onClick={saveAlias}>
               <Check size={11} />
@@ -76,40 +80,44 @@ export default function TableNode({ id, data, selected }) {
       </div>
 
       {/* Select all toggle */}
-      <div className="table-node-select-all" onClick={() => allSelected ? clearColumnSelection(id) : selectAllColumns(id)}>
-        {allSelected
-          ? <CheckSquare size={11} className="check-icon check-all" />
-          : someSelected
-            ? <CheckSquare size={11} className="check-icon check-some" />
-            : <Square size={11} className="check-icon" />
-        }
-        <span>{allSelected ? 'Deselect all' : 'Select all'}</span>
-        <span className="col-sel-count">{nodeSelected.length}/{columns.length}</span>
-      </div>
+      {!isCollapsed && (
+        <div className="table-node-select-all" onClick={() => allSelected ? clearColumnSelection(id) : selectAllColumns(id)}>
+          {allSelected
+            ? <CheckSquare size={11} className="check-icon check-all" />
+            : someSelected
+              ? <CheckSquare size={11} className="check-icon check-some" />
+              : <Square size={11} className="check-icon" />
+          }
+          <span>{allSelected ? 'Deselect all' : 'Select all'}</span>
+          <span className="col-sel-count">{nodeSelected.length}/{columns.length}</span>
+        </div>
+      )}
 
       {/* Column list */}
-      <div className="table-node-columns">
-        {columns.map((col) => {
-          const isChecked = nodeSelected.includes(col.columnName);
-          return (
-            <div
-              key={col.columnName}
-              className={`table-node-col ${isChecked ? 'col-checked' : ''}`}
-              onClick={() => toggleColumn(id, col.columnName)}
-            >
-              <span className={`col-key-badge ${col.columnKey === 'PRI' ? 'pk' : ''}`}>
-                {col.columnKey === 'PRI' ? 'PK' : ''}
-              </span>
-              <span className="col-name">{col.columnName}</span>
-              <span className="col-type">{col.dataType}</span>
-              {isChecked
-                ? <CheckSquare size={12} className="col-check checked" />
-                : <Square size={12} className="col-check" />
-              }
-            </div>
-          );
-        })}
-      </div>
+      {!isCollapsed && (
+        <div className="table-node-columns">
+          {columns.map((col) => {
+            const isChecked = nodeSelected.includes(col.columnName);
+            return (
+              <div
+                key={col.columnName}
+                className={`table-node-col ${isChecked ? 'col-checked' : ''}`}
+                onClick={() => toggleColumn(id, col.columnName)}
+              >
+                <span className={`col-key-badge ${col.columnKey === 'PRI' ? 'pk' : ''}`}>
+                  {col.columnKey === 'PRI' ? 'PK' : ''}
+                </span>
+                <span className="col-name">{col.columnName}</span>
+                <span className="col-type">{col.dataType}</span>
+                {isChecked
+                  ? <CheckSquare size={12} className="col-check checked" />
+                  : <Square size={12} className="col-check" />
+                }
+              </div>
+            );
+          })}
+        </div>
+      )}
 
       {/* Right handle */}
       <Handle type="source" position={Position.Right} id="right"   className="table-handle" />
