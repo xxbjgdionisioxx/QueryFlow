@@ -1,0 +1,154 @@
+/* App.css — Layout-level component styles */
+
+/* ── Header ─────────────────────────────────────────────────── */
+.app-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.app-logo-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-md);
+  background: linear-gradient(135deg, var(--accent-primary), #a78bfa);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  box-shadow: 0 0 12px rgba(124,106,247,0.4);
+}
+
+.app-logo-text {
+  font-size: 1.1rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #e6edf3, var(--accent-hover));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: -0.02em;
+}
+
+.app-header-sep {
+  width: 1px;
+  height: 24px;
+  background: var(--border-default);
+  flex-shrink: 0;
+}
+
+.conn-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+.conn-status.connected { color: var(--success); }
+
+.conn-db {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.conn-version {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-muted);
+  padding: 2px 8px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-muted);
+  border-radius: 10px;
+}
+
+/* ── Sidebar empty state ─────────────────────────────────────── */
+.app-sidebar--empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sidebar-connect-prompt {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  text-align: center;
+  padding: 24px;
+  color: var(--text-secondary);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+/* ── Canvas area ─────────────────────────────────────────────── */
+.canvas-area {
+  min-height: 200px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Bottom panel ────────────────────────────────────────────── */
+.bottom-panel {
+  background: var(--bg-surface);
+  border-top: 1px solid var(--border-default);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  transition: height var(--duration) var(--ease-out);
+}
+
+.bottom-tabs {
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  border-bottom: 1px solid var(--border-muted);
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.bottom-tab {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 9px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: transparent;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  transition: all var(--duration);
+  white-space: nowrap;
+}
+.bottom-tab:hover { color: var(--text-primary); background: rgba(255,255,255,0.04); }
+.bottom-tab.active {
+  color: var(--accent-primary);
+  border-bottom-color: var(--accent-primary);
+}
+
+.bottom-panel-toggle {
+  margin-left: auto;
+}
+.bottom-panel-toggle .flip { transform: rotate(180deg); }
+
+.bottom-panel-content {
+  height: 260px;
+  overflow-y: auto;
+  flex-shrink: 0;
+}
+
+/* Spinner (reused from ConnectionModal) */
+.spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  flex-shrink: 0;
+  display: inline-block;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.spin { animation: spin 1s linear infinite; }
+.flip { transform: rotate(180deg); }
