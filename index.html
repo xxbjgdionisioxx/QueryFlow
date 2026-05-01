@@ -1,0 +1,1047 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QueryFlow | The No-Code Visual SQL Builder</title>
+    <meta name="description" content="A professional web-based, no-code visual SQL query builder for MySQL.">
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%237c6af7' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5'/><path d='M21 5c0 1.66-4 3-9 3S3 6.66 3 5'/><path d='M21 12c0 1.66-4 3-9 3s-9-1.34-9-3'/></svg>">
+    <!-- Load Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        /* CSS Reset & Design Tokens */
+        :root {
+            --bg-base: #0f111a;
+            --bg-surface: #1a1d2d;
+            --text-primary: #f8f9fa;
+            --text-secondary: #94a3b8;
+            --accent-primary: #7c6af7;
+            --accent-hover: #6366f1;
+            --glass-bg: rgba(26, 29, 45, 0.6);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --font-main: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: var(--font-main);
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Typography */
+        h1,
+        h2,
+        h3,
+        h4 {
+            line-height: 1.2;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+
+        h1 {
+            font-size: clamp(2.5rem, 5vw, 4.5rem);
+            background: linear-gradient(135deg, #ffffff 0%, #a78bfa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1.5rem;
+        }
+
+        h2 {
+            font-size: clamp(2rem, 3vw, 2.5rem);
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto 4rem;
+        }
+
+        /* Layout Utilities */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+        }
+
+        .section {
+            padding: 8rem 0;
+            position: relative;
+        }
+
+        .glass-panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            padding: 1.2rem 0;
+            transition: all 0.3s ease;
+        }
+
+        nav.scrolled {
+            background: rgba(15, 17, 26, 0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.25rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: white;
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: var(--text-primary);
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            padding: 0.5rem;
+            z-index: 1001;
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.8rem 1.75rem;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            border: none;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-hover) 100%);
+            color: white;
+            box-shadow: 0 8px 20px rgba(124, 106, 247, 0.25);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 25px rgba(124, 106, 247, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.03);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateY(-2px);
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding-top: 8rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-glow {
+            position: absolute;
+            top: 20%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80vw;
+            height: 80vw;
+            max-width: 800px;
+            max-height: 800px;
+            background: radial-gradient(circle, rgba(124, 106, 247, 0.15) 0%, rgba(15, 17, 26, 0) 70%);
+            z-index: -1;
+            border-radius: 50%;
+            filter: blur(60px);
+        }
+
+        .hero-content {
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero p {
+            font-size: clamp(1.1rem, 2vw, 1.25rem);
+            color: var(--text-secondary);
+            margin-bottom: 2.5rem;
+            font-weight: 400;
+        }
+
+        .hero-cta {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 4rem;
+        }
+
+        /* Dashboard Mockup Animation */
+        .hero-mockup-wrapper {
+            perspective: 1000px;
+            padding: 0 1rem;
+            margin-top: 2rem;
+            opacity: 0;
+            transform: translateY(40px);
+            animation: fadeUp 1s cubic-bezier(0.16, 1, 0.3, 1) forwards 0.3s;
+        }
+
+        .hero-mockup {
+            width: 100%;
+            border-radius: 16px;
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.05);
+            transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            transform: rotateX(5deg);
+        }
+
+        .hero-mockup-wrapper:hover .hero-mockup {
+            transform: rotateX(0deg) translateY(-10px);
+        }
+
+        @keyframes fadeUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Features Section */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .feature-card {
+            padding: 2.5rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, transparent 100%);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-8px);
+            border-color: rgba(124, 106, 247, 0.3);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .feature-card:hover::before {
+            opacity: 1;
+        }
+
+        .feature-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 14px;
+            background: rgba(124, 106, 247, 0.1);
+            border: 1px solid rgba(124, 106, 247, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent-primary);
+            margin-bottom: 1.5rem;
+            transition: transform 0.3s;
+        }
+
+        .feature-card:hover .feature-icon {
+            transform: scale(1.1) rotate(-5deg);
+            background: var(--accent-primary);
+            color: white;
+        }
+
+        .feature-card h3 {
+            font-size: 1.25rem;
+            margin-bottom: 0.75rem;
+            color: white;
+        }
+
+        .feature-card p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        /* Screenshot Gallery */
+        .gallery-filter {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 3rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            background: transparent;
+            border: 1px solid var(--glass-border);
+            color: var(--text-secondary);
+            padding: 0.5rem 1.2rem;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .filter-btn.active,
+        .filter-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+        }
+
+        .gallery-item {
+            position: relative;
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid var(--glass-border);
+            cursor: pointer;
+            aspect-ratio: 16/9;
+            background: var(--bg-surface);
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: top;
+            transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .gallery-item:hover img {
+            transform: scale(1.03);
+        }
+
+        .gallery-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to top, rgba(15, 17, 26, 0.9) 0%, rgba(15, 17, 26, 0.2) 50%, transparent 100%);
+            opacity: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 2rem;
+            transition: opacity 0.3s ease;
+        }
+
+        .gallery-item:hover .gallery-overlay {
+            opacity: 1;
+        }
+
+        .gallery-overlay h4 {
+            color: white;
+            font-size: 1.2rem;
+            margin-bottom: 0.25rem;
+            transform: translateY(10px);
+            transition: transform 0.3s ease;
+        }
+
+        .gallery-overlay p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            transform: translateY(10px);
+            transition: transform 0.3s ease 0.05s;
+        }
+
+        .gallery-item:hover .gallery-overlay h4,
+        .gallery-item:hover .gallery-overlay p {
+            transform: translateY(0);
+        }
+
+        /* Interactive Demo Section */
+        .demo-section {
+            background: linear-gradient(180deg, var(--bg-base) 0%, rgba(26, 29, 45, 0.4) 100%);
+            border-top: 1px solid var(--glass-border);
+            border-bottom: 1px solid var(--glass-border);
+            padding: 6rem 0;
+        }
+
+        .terminal-window {
+            background: #0d0f17;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            overflow: hidden;
+            margin: 3rem auto 0;
+            max-width: 800px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .terminal-header {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 0.75rem 1rem;
+            display: flex;
+            gap: 0.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .terminal-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot-red {
+            background: #ff5f56;
+        }
+
+        .dot-yellow {
+            background: #ffbd2e;
+        }
+
+        .dot-green {
+            background: #27c93f;
+        }
+
+        .terminal-body {
+            padding: 1.5rem;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.9rem;
+            color: #a0aec0;
+            line-height: 1.5;
+        }
+
+        .terminal-line {
+            margin-bottom: 0.5rem;
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .terminal-cursor {
+            display: inline-block;
+            width: 8px;
+            height: 18px;
+            background: var(--accent-primary);
+            margin-left: 4px;
+            animation: blink 1s infinite;
+            vertical-align: middle;
+        }
+
+        @keyframes blink {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0;
+            }
+        }
+
+        /* Developer Section */
+        .dev-section {
+            text-align: center;
+            position: relative;
+        }
+
+        .dev-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1.2rem;
+            background: rgba(124, 106, 247, 0.1);
+            color: var(--accent-primary);
+            border: 1px solid rgba(124, 106, 247, 0.2);
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .dev-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--bg-surface), rgba(124, 106, 247, 0.2));
+            border: 2px solid var(--accent-primary);
+            margin: 0 auto 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            box-shadow: 0 10px 25px rgba(124, 106, 247, 0.2);
+        }
+
+        /* Footer */
+        footer {
+            padding: 3rem 0;
+            border-top: 1px solid var(--glass-border);
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .social-links a {
+            color: var(--text-secondary);
+            transition: color 0.2s;
+        }
+
+        .social-links a:hover {
+            color: white;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .mobile-menu-btn {
+                display: block;
+            }
+
+            .nav-links {
+                position: fixed;
+                top: 0;
+                right: -100%;
+                width: 100%;
+                height: 100vh;
+                background: var(--bg-base);
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                gap: 2rem;
+                transition: 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+                backdrop-filter: blur(25px);
+                z-index: 1000;
+                padding: 2rem;
+            }
+
+            .nav-links.active {
+                right: 0;
+            }
+
+            .nav-links a {
+                font-size: 1.5rem;
+                font-weight: 700;
+                letter-spacing: 0.05em;
+            }
+
+            .mobile-cta-highlight {
+                width: 100%;
+                max-width: 280px;
+                padding: 1.2rem !important;
+                font-size: 1rem !important;
+                background: linear-gradient(135deg, var(--accent-primary) 0%, #fff 300%) !important;
+                box-shadow: 0 0 30px rgba(124, 106, 247, 0.4) !important;
+                border: none !important;
+                margin-top: 2rem !important;
+            }
+
+            .hero-cta {
+                flex-direction: column;
+                width: 100%;
+                max-width: 300px;
+                margin-left: auto;
+                margin-right: auto;
+            }
+
+            .gallery-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .footer-content {
+                flex-direction: column;
+                gap: 1.5rem;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Navigation -->
+    <nav id="navbar">
+        <div class="container nav-container">
+            <a href="#" class="logo">
+                <i data-lucide="database" color="#7c6af7"></i>
+                QueryFlow
+            </a>
+            <div class="nav-links" id="nav-links">
+                <a href="#features">Features</a>
+                <a href="#gallery">Interface</a>
+                <a href="#developer">Developer</a>
+                <a href="https://github.com/xxbjgdionisioxx/QueryFlow" target="_blank"
+                    class="btn btn-primary mobile-cta-highlight text-white">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path
+                            d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4">
+                        </path>
+                        <path d="M9 18c-4.51 2-5-2-7-2"></path>
+                    </svg> View on GitHub
+                </a>
+            </div>
+
+            <button class="mobile-menu-btn" id="menu-toggle">
+                <i data-lucide="menu"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-glow"></div>
+        <div class="container">
+            <div class="hero-content">
+                <h1>The No-Code Visual <br />SQL Query Builder</h1>
+                <p>Drag tables, draw JOINs, set filters, and run queries visually. Powered by an integrated AI Assistant
+                    to guide you every step of the way.</p>
+                <div class="hero-cta">
+                    <button class="btn btn-primary"
+                        onclick="document.getElementById('features').scrollIntoView({behavior: 'smooth'})">
+                        Explore Features <i data-lucide="arrow-right" style="width: 18px; height: 18px;"></i>
+                    </button>
+                    <button class="btn btn-secondary"
+                        onclick="document.getElementById('gallery').scrollIntoView({behavior: 'smooth'})">
+                        <i data-lucide="image" style="width: 18px; height: 18px;"></i> View Gallery
+                    </button>
+                </div>
+            </div>
+
+            <div class="hero-mockup-wrapper">
+                <img src="./screenshots/dashboard-page.png" alt="QueryFlow Dashboard" class="hero-mockup"
+                    onerror="this.src='https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=2000&auto=format&fit=crop'; this.style.opacity='0.5';">
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="section">
+        <div class="container">
+            <h2>Powerful Features</h2>
+            <p class="subtitle">Everything you need to architect complex queries without writing a single line of SQL.
+            </p>
+
+            <div class="features-grid">
+                <!-- Feature 1 -->
+                <div class="feature-card glass-panel">
+                    <div class="feature-icon">
+                        <i data-lucide="mouse-pointer-2"></i>
+                    </div>
+                    <h3>Visual Canvas</h3>
+                    <p>Drag and drop tables from your database schema directly onto an interactive React Flow canvas.
+                        Easily connect nodes to define relationships.</p>
+                </div>
+
+                <!-- Feature 2 -->
+                <div class="feature-card glass-panel">
+                    <div class="feature-icon">
+                        <i data-lucide="bot"></i>
+                    </div>
+                    <h3>Gemini AI Assistant</h3>
+                    <p>Stuck on a query? The integrated context-aware AI understands your specific database schema and
+                        provides human-like guidance and optimized SQL solutions.</p>
+                </div>
+
+                <!-- Feature 3 -->
+                <div class="feature-card glass-panel">
+                    <div class="feature-icon">
+                        <i data-lucide="git-merge"></i>
+                    </div>
+                    <h3>Smart JOIN Builder</h3>
+                    <p>Visually configure INNER, LEFT, and RIGHT joins. QueryFlow automatically detects foreign keys and
+                        suggests column matchers instantly.</p>
+                </div>
+
+                <!-- Feature 4 -->
+                <div class="feature-card glass-panel">
+                    <div class="feature-icon">
+                        <i data-lucide="download"></i>
+                    </div>
+                    <h3>Multi-Format Export</h3>
+                    <p>Execute your queries live and export the paginated results seamlessly to CSV, Excel (XLS), JSON,
+                        or formatted TXT files.</p>
+                </div>
+
+                <!-- Feature 5 -->
+                <div class="feature-card glass-panel">
+                    <div class="feature-icon">
+                        <i data-lucide="shield-check"></i>
+                    </div>
+                    <h3>Secure Connections</h3>
+                    <p>Connect safely using AES-256-GCM encryption. Includes OTP-based password resets, session
+                        management, and comprehensive audit logging.</p>
+                </div>
+
+                <!-- Feature 6 -->
+                <div class="feature-card glass-panel">
+                    <div class="feature-icon">
+                        <i data-lucide="code-2"></i>
+                    </div>
+                    <h3>Live SQL Preview</h3>
+                    <p>Watch the underlying SQL statement build and update in real-time as you interact with the UI.
+                        Perfect for learning SQL or auditing complex logic.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Interactive Terminal/Demo Section -->
+    <section class="demo-section">
+        <div class="container text-center">
+            <h2>Built for Modern Development</h2>
+            <p class="subtitle" style="margin-bottom: 1rem;">Setup is incredibly simple. Clone, install, and run.</p>
+
+            <div class="terminal-window" id="terminal">
+                <div class="terminal-header">
+                    <div class="terminal-dot dot-red"></div>
+                    <div class="terminal-dot dot-yellow"></div>
+                    <div class="terminal-dot dot-green"></div>
+                </div>
+                <div class="terminal-body" id="terminal-body" style="text-align: left; min-height: 140px;">
+                    <!-- Content will be injected by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Gallery Section -->
+    <section id="gallery" class="section">
+        <div class="container">
+            <h2>Interface Showcase</h2>
+            <p class="subtitle">A glimpse into the premium, glassmorphism-inspired UI designed for maximum productivity.
+            </p>
+
+            <div class="gallery-filter">
+                <button class="filter-btn active">All</button>
+                <button class="filter-btn">Workspace</button>
+                <button class="filter-btn">AI & Tools</button>
+                <button class="filter-btn">Auth & Security</button>
+            </div>
+
+            <div class="gallery-grid">
+                <!-- Gallery Items -->
+                <div class="gallery-item" data-category="Workspace">
+                    <img src="./screenshots/dashboard-page.png" alt="Dashboard" onerror="this.style.display='none'">
+                    <div class="gallery-overlay">
+                        <h4>Visual Workspace</h4>
+                        <p>The core drag-and-drop builder interface.</p>
+                    </div>
+                </div>
+
+                <div class="gallery-item" data-category="AI & Tools">
+                    <img src="./screenshots/ai-chat.png" alt="AI Chat" onerror="this.style.display='none'">
+                    <div class="gallery-overlay">
+                        <h4>QueryFlow AI</h4>
+                        <p>Context-aware Gemini Flash assistant.</p>
+                    </div>
+                </div>
+
+                <div class="gallery-item" data-category="Workspace">
+                    <img src="./screenshots/result-tab.png" alt="Results and Export"
+                        onerror="this.style.display='none'">
+                    <div class="gallery-overlay">
+                        <h4>Data Results & Export</h4>
+                        <p>Live execution with multi-format downloads.</p>
+                    </div>
+                </div>
+
+                <div class="gallery-item" data-category="Auth & Security">
+                    <img src="./screenshots/connection-history-lists.png" alt="Connection History"
+                        onerror="this.style.display='none'">
+                    <div class="gallery-overlay">
+                        <h4>Connection Vault</h4>
+                        <p>Encrypted, saved database configurations.</p>
+                    </div>
+                </div>
+
+                <div class="gallery-item" data-category="Auth & Security">
+                    <img src="./screenshots/new-connection-form.png" alt="New Connection"
+                        onerror="this.style.display='none'">
+                    <div class="gallery-overlay">
+                        <h4>Secure Connect</h4>
+                        <p>Add new remote or local MySQL instances.</p>
+                    </div>
+                </div>
+
+                <div class="gallery-item" data-category="Auth & Security">
+                    <img src="./screenshots/login-page.png" alt="Login Portal" onerror="this.style.display='none'">
+                    <div class="gallery-overlay">
+                        <h4>Authentication</h4>
+                        <p>Secure login with OTP verification support.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Developer Section -->
+    <section id="developer" class="section dev-section">
+        <div class="container">
+            <div class="glass-panel" style="max-width: 800px; margin: 0 auto; padding: 4rem 2rem;">
+                <div class="dev-badge"><i data-lucide="code"></i> Lead Developer & Architect</div>
+
+                <div class="dev-avatar">
+                    <i data-lucide="user" size="40"></i>
+                </div>
+
+                <h2>Bryan James G. Dionisio</h2>
+                <p
+                    style="color: var(--text-secondary); margin-bottom: 2rem; max-width: 500px; margin-left: auto; margin-right: auto;">
+                    Passionate full-stack developer specializing in modern JavaScript ecosystems, intuitive UX/UI
+                    design, and building robust tools that simplify complex technical workflows.
+                </p>
+
+                <div style="display: flex; justify-content: center; gap: 1rem;">
+                    <a href="https://github.com/xxbjgdionisioxx" target="_blank" class="btn btn-secondary">
+                        <i data-lucide="github"></i> GitHub Profile
+                    </a>
+                    <a href="mailto:dionisiobryanjames@gmail.com" target="_blank" class="btn btn-primary">
+                        <i data-lucide="mail"></i> Get in Touch
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container footer-content">
+            <div class="logo" style="font-size: 1rem;">
+                <i data-lucide="database" size="18" color="#7c6af7"></i> QueryFlow
+            </div>
+
+            <p>&copy; <span id="year"></span> Bryan James G. Dionisio. All rights reserved.</p>
+
+            <div class="social-links">
+                <a href="#"><i data-lucide="twitter" size="18"></i></a>
+                <a href="#"><i data-lucide="linkedin" size="18"></i></a>
+                <a href="https://github.com/xxbjgdionisioxx" target="_blank">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path
+                            d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4">
+                        </path>
+                        <path d="M9 18c-4.51 2-5-2-7-2"></path>
+                    </svg>
+                </a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Interactive Scripts -->
+    <script>
+        // Initialize Lucide Icons
+        lucide.createIcons();
+
+        // Update Copyright Year
+        document.getElementById('year').textContent = new Date().getFullYear();
+
+        // Navbar Scroll Effect
+        window.addEventListener('scroll', () => {
+            const nav = document.getElementById('navbar');
+            if (window.scrollY > 50) {
+                nav.classList.add('scrolled');
+            } else {
+                nav.classList.remove('scrolled');
+            }
+        });
+
+        // Mobile Menu Toggle Logic
+        const menuToggle = document.getElementById('menu-toggle');
+        const navLinks = document.getElementById('nav-links');
+        const body = document.body;
+
+        menuToggle.addEventListener('click', () => {
+            navLinks.classList.toggle('active');
+            const icon = menuToggle.querySelector('i');
+            if (navLinks.classList.contains('active')) {
+                icon.setAttribute('data-lucide', 'x');
+                body.style.overflow = 'hidden';
+            } else {
+                icon.setAttribute('data-lucide', 'menu');
+                body.style.overflow = 'auto';
+            }
+            lucide.createIcons();
+        });
+
+        // Close menu when clicking a link
+        document.querySelectorAll('.nav-links a').forEach(link => {
+            link.addEventListener('click', () => {
+                navLinks.classList.remove('active');
+                menuToggle.querySelector('i').setAttribute('data-lucide', 'menu');
+                body.style.overflow = 'auto';
+                lucide.createIcons();
+            });
+        });
+
+        // Terminal Typing Animation Logic
+        const terminalBody = document.getElementById('terminal-body');
+        const terminalLines = [
+            { text: "git clone https://github.com/xxbjgdionisioxx/QueryFlow", type: "command" },
+            { text: "cd server && npm run dev", type: "command" },
+            { text: "cd client && npm run dev", type: "command" },
+            { text: "QueryFlow started successfully on http://localhost:5173 🚀", type: "response" }
+        ];
+
+        async function typeTerminal() {
+            terminalBody.innerHTML = '';
+
+            for (let i = 0; i < terminalLines.length; i++) {
+                const line = terminalLines[i];
+                const lineEl = document.createElement('div');
+                lineEl.className = 'terminal-line';
+
+                if (line.type === 'command') {
+                    lineEl.innerHTML = `<span style="color: #a78bfa;">$</span> <span class="content"></span><span class="terminal-cursor"></span>`;
+                } else {
+                    lineEl.innerHTML = `<span style="color: #27c93f;">></span> <span class="content" style="color: #27c93f;"></span><span class="terminal-cursor"></span>`;
+                }
+
+                terminalBody.appendChild(lineEl);
+                const contentEl = lineEl.querySelector('.content');
+                const cursor = lineEl.querySelector('.terminal-cursor');
+
+                const words = line.text.split(' ');
+                for (let word of words) {
+                    contentEl.textContent += word + ' ';
+                    await new Promise(r => setTimeout(r, 100 + Math.random() * 150)); // Random human-like delay
+                }
+
+                cursor.remove();
+                await new Promise(r => setTimeout(r, 500)); // Pause between lines
+            }
+
+            await new Promise(r => setTimeout(r, 3000)); // Final pause before loop
+            typeTerminal(); // Loop
+        }
+
+        // Trigger Terminal Animation on Scroll
+        const observerOptions = { threshold: 0.5 };
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    typeTerminal();
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+
+        const terminal = document.getElementById('terminal');
+        if (terminal) observer.observe(terminal);
+
+        // Simple Gallery Filter Logic
+        const filterBtns = document.querySelectorAll('.filter-btn');
+        const galleryItems = document.querySelectorAll('.gallery-item');
+
+        filterBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                // Remove active class from all
+                filterBtns.forEach(b => b.classList.remove('active'));
+                // Add to clicked
+                btn.classList.add('active');
+
+                const filterValue = btn.textContent;
+
+                galleryItems.forEach(item => {
+                    if (filterValue === 'All' || item.getAttribute('data-category') === filterValue) {
+                        item.style.display = 'block';
+                        setTimeout(() => item.style.opacity = '1', 50);
+                    } else {
+                        item.style.opacity = '0';
+                        setTimeout(() => item.style.display = 'none', 300);
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>
