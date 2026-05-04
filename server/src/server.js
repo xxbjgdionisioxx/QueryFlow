@@ -12,6 +12,7 @@ import cors from 'cors';
 import { router } from './api/routes.js';
 import { authRouter } from './api/authRoutes.js';
 import { aiRouter } from './api/aiRoutes.js';
+import { designerRouter } from './api/designerRoutes.js';
 import { initInternalDb } from './services/internalDb.js';
 
 const app = express();
@@ -42,6 +43,7 @@ app.use(session({
 
 app.use('/api/auth', authRouter);
 app.use('/api/ai', aiRouter);
+app.use('/api/designer', designerRouter);
 app.use('/api', router);
 
 // Health check (no credentials required)

@@ -99,10 +99,23 @@ async function runMigrations() {
     )
   `;
 
+  const designerLayoutsTable = `
+    CREATE TABLE IF NOT EXISTS designer_layouts (
+      id VARCHAR(36) PRIMARY KEY,
+      user_id VARCHAR(36) NOT NULL,
+      connection_id VARCHAR(36) NOT NULL,
+      layout_json LONGTEXT NOT NULL,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+      FOREIGN KEY (connection_id) REFERENCES saved_connections(id) ON DELETE CASCADE
+    )
+  `;
+
   await pool.query(usersTable);
   await pool.query(connectionsTable);
   await pool.query(signinLogsTable);
   await pool.query(queryLogsTable);
+  await pool.query(designerLayoutsTable);
 
   // Migration: Add columns if they don't exist
   try {

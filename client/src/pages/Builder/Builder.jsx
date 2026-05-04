@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   Database, Play, Plug, PlugZap, ChevronDown,
-  Filter, BarChart2, Code2, Table2, Trash2, RotateCcw, PanelLeft, PanelLeftClose
+  Filter, BarChart2, Code2, Table2, Trash2, RotateCcw, PanelLeft, PanelLeftClose, Layout
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -87,6 +87,10 @@ export default function Builder() {
                 onClick={() => { disconnect(); setShowConnModal(false); }}
               >
                 Disconnect
+              </button>
+              <div className="app-header-sep" />
+              <button className="btn btn-ghost btn-sm" onClick={() => navigate('/designer')}>
+                <Layout size={13} /> Designer
               </button>
             </div>
           ) : (
