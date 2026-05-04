@@ -79,6 +79,19 @@ export async function getSchema(sessionId, { includeViews = false } = {}) {
     ORDER BY TABLE_NAME, ORDINAL_POSITION
   `, [database]);
 
+  // ── Fetch Foreign Keys ────────────────────────────────────────────────────
+  const [foreignKeys] = await query(sessionId, `
+    SELECT
+      TABLE_NAME            AS tableName,
+      COLUMN_NAME           AS columnName,
+      CONSTRAINT_NAME       AS constraintName,
+      REFERENCED_TABLE_NAME AS referencedTable,
+      REFERENCED_COLUMN_NAME AS referencedColumn
+    FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE
+    WHERE TABLE_SCHEMA = ?
+      AND REFERENCED_TABLE_NAME IS NOT NULL
+  `, [database]);
+
   // ── Group columns by table ────────────────────────────────────────────────
   const columnsByTable = {};
   for (const col of columns) {
@@ -97,6 +110,15 @@ export async function getSchema(sessionId, { includeViews = false } = {}) {
     });
   }
 
+  // ── Group foreign keys by table ───────────────────────────────────────────
+  const fksByTable = {};
+  for (const fk of foreignKeys) {
+    if (!fksByTable[fk.tableName]) {
+      fksByTable[fk.tableName] = [];
+    }
+    fksByTable[fk.tableName].push(fk);
+  }
+
   // ── Assemble final schema ─────────────────────────────────────────────────
   return tables.map((t) => ({
     tableName:     t.tableName,
@@ -104,5 +126,6 @@ export async function getSchema(sessionId, { includeViews = false } = {}) {
     estimatedRows: t.estimatedRows,
     tableComment:  t.tableComment,
     columns:       columnsByTable[t.tableName] ?? [],
+    foreignKeys:   fksByTable[t.tableName] ?? [],
   }));
 }

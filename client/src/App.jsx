@@ -5,6 +5,7 @@ import { useConnectionStore } from './store/connectionStore';
 import { useQueryStore } from './store/queryStore';
 
 import Builder from './pages/Builder/Builder';
+import Designer from './pages/Designer/Designer';
 import Login from './pages/Auth/Login';
 import Signup from './pages/Auth/Signup';
 import ForgotPassword from './pages/Auth/ForgotPassword';
@@ -43,6 +44,10 @@ export default function App() {
         <Route 
           path="/" 
           element={isAuthenticated ? <Builder /> : <Navigate to="/login" replace />} 
+        />
+        <Route 
+          path="/designer" 
+          element={isAuthenticated ? <Designer /> : <Navigate to="/login" replace />} 
         />
         <Route 
           path="/login" 

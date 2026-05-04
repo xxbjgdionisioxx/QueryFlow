@@ -1,0 +1,214 @@
+.designer-table-node {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  min-width: 360px;
+  color: white;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.designer-table-node.selected {
+  border-color: var(--primary-color, #3b82f6);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3), 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+.table-header {
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.header-icon {
+  color: var(--primary-color, #3b82f6);
+}
+
+.table-name {
+  flex: 1;
+  font-weight: 600;
+  font-size: 0.85rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: text;
+}
+
+.table-name-input {
+  flex: 1;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  color: white;
+  font-size: 0.85rem;
+  padding: 2px 6px;
+  outline: none;
+}
+
+.remove-btn {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.4);
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: background 0.2s, color 0.2s;
+}
+
+.remove-btn:hover {
+  background: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+}
+
+.columns-list {
+  padding: 4px 0;
+}
+
+.column-row {
+  position: relative;
+  padding: 4px 12px;
+  display: flex;
+  align-items: center;
+}
+
+.column-row:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.col-controls {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.col-name-input {
+  width: 80px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  color: white;
+  font-size: 0.75rem;
+  padding: 2px 4px;
+  outline: none;
+  min-width: 0;
+}
+
+.col-name-input:focus {
+  background: rgba(0, 0, 0, 0.2);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.col-details {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.col-type-select {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.7rem;
+  padding: 1px 4px;
+  outline: none;
+  cursor: pointer;
+  width: 65px;
+}
+
+.col-length-input {
+  width: 35px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-left: none;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  border-top-right-radius: 4px;
+  border-bottom-right-radius: 4px;
+  color: #fbbf24;
+  font-size: 0.7rem;
+  padding: 1px 4px;
+  outline: none;
+  text-align: center;
+}
+
+.col-actions {
+  display: flex;
+  align-items: center;
+  gap: 1px;
+}
+
+.col-attr-btn {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.25);
+  cursor: pointer;
+  padding: 3px;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.col-attr-btn:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.col-attr-btn.active {
+  color: #fbbf24;
+}
+
+.col-remove-btn {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.15);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+}
+
+.col-remove-btn:hover {
+  color: #ef4444;
+}
+
+.col-handle {
+  width: 8px !important;
+  height: 8px !important;
+  background: var(--primary-color, #3b82f6) !important;
+  border: 2px solid rgba(0, 0, 0, 0.5) !important;
+}
+
+.table-footer {
+  padding: 8px 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.add-col-btn {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px dashed rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.7rem;
+  padding: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  transition: all 0.2s;
+}
+
+.add-col-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
+  color: white;
+}
